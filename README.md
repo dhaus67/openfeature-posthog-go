@@ -1,4 +1,6 @@
 # PostHog OpenFeature Provider for Go
+[![Go Reference](https://pkg.go.dev/badge/github.com/dhaus67/openfeature-posthog-go.svg)](https://pkg.go.dev/github.com/dhaus67/openfeature-posthog-go)
+
 
 This repository provides an implementation of an [OpenFeature provider](https://openfeature.dev/docs/reference/concepts/provider) for [PostHog](https://posthog.com/).
 
@@ -23,7 +25,7 @@ func main() {
 	}
 
 	// Create the provider and register it.
-	openfeature.SetProvider(provider.NewProvider(client))
+	openfeature.SetProvider(openfeatureposthog.NewProvider(client))
 
 	client := openfeature.NewClient("my-client")
 
