@@ -1,0 +1,12 @@
+run:
+  go: "1.23"
+
+linters:
+  disable-all: true
+  enable:
+    - gocritic
+    - gosimple
+    - govet
+    - revive
+    - gofmt
+    - staticcheck
