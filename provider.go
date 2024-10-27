@@ -90,17 +90,23 @@ func (p *Provider) BooleanEvaluation(_ context.Context, flag string, defaultValu
 		}
 	}
 
-	// For boolean flag values, we are explicitly ignoring the case where the flag is not found.
-	// The PostHog client cannot differentiate between "false boolean flag values" and "flag not found".
-	// It will return "false" in both cases. Instead of having false-positives and errors on the client
-	// side we are ignoring the "flag not found" error for boolean flags.
-	res, _, err := p.getFeatureFlag(payload)
+	res, found, err := p.getFeatureFlag(payload)
 	if err != nil {
 		return openfeature.BoolResolutionDetail{
 			Value: defaultValue,
 			ProviderResolutionDetail: openfeature.ProviderResolutionDetail{
 				ResolutionError: openfeature.NewGeneralResolutionError(err.Error()),
 				Reason:          openfeature.ErrorReason,
+			},
+		}
+	}
+
+	if !found {
+		return openfeature.BoolResolutionDetail{
+			Value: defaultValue,
+			ProviderResolutionDetail: openfeature.ProviderResolutionDetail{
+				ResolutionError: openfeature.NewFlagNotFoundResolutionError(fmt.Sprintf("%q not found", flag)),
+				Reason:          openfeature.DefaultReason,
 			},
 		}
 	}
@@ -339,12 +345,9 @@ func (p *Provider) getFeatureFlag(payload posthog.FeatureFlagPayload) (interface
 	}
 
 	// In case the flag could not be found, the client will return false for the flag value.
-	// There is no other way to have a distinction, which will lead to potential false positives when
-	// evaluating boolean flags (i.e. the flag is there, but it is set to false for the distinct ID).
-	if s, ok := res.(string); ok {
-		if b, err := strconv.ParseBool(s); err == nil && !b {
-			return res, false, nil
-		}
+	// This is the only time where it will return a boolean value instead of a string value.
+	if res, ok := res.(bool); ok {
+		return res, false, nil
 	}
 
 	return res, true, nil

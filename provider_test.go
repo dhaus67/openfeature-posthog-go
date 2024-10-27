@@ -56,6 +56,32 @@ func TestProvider_BooleanEvaluation(t *testing.T) {
 				},
 			},
 		},
+		"non-existing bool flag": {
+			flag:         "bool-flag",
+			defaultValue: false,
+			evalCtx:      openfeature.NewEvaluationContext("12345", map[string]interface{}{}),
+			mockSettings: mockSettings{
+				payload: posthog.FeatureFlagPayload{
+					Key:        "bool-flag",
+					DistinctId: "12345",
+				},
+				res: false,
+			},
+			err: true,
+			res: openfeature.BooleanEvaluationDetails{
+				Value: false,
+				EvaluationDetails: openfeature.EvaluationDetails{
+					FlagKey:  "bool-flag",
+					FlagType: openfeature.Boolean,
+					ResolutionDetail: openfeature.ResolutionDetail{
+						Reason:       openfeature.ErrorReason,
+						ErrorCode:    openfeature.FlagNotFoundCode,
+						ErrorMessage: `"bool-flag" not found`,
+						FlagMetadata: openfeature.FlagMetadata{},
+					},
+				},
+			},
+		},
 		"invalid format boolean flag": {
 			flag:         "bool-flag",
 			defaultValue: false,
@@ -140,7 +166,7 @@ func TestProvider_FloatEvaluation(t *testing.T) {
 					Key:        "float-flag",
 					DistinctId: "12345",
 				},
-				res: "false",
+				res: false,
 			},
 			err: true,
 			res: openfeature.FloatEvaluationDetails{
@@ -241,7 +267,7 @@ func TestProvider_StringEvaluation(t *testing.T) {
 					Key:        "string-flag",
 					DistinctId: "12345",
 				},
-				res: "false",
+				res: false,
 			},
 			err: true,
 			res: openfeature.StringEvaluationDetails{
@@ -316,7 +342,7 @@ func TestProvider_IntEvaluation(t *testing.T) {
 					Key:        "int-flag",
 					DistinctId: "12345",
 				},
-				res: "false",
+				res: false,
 			},
 			err: true,
 			res: openfeature.IntEvaluationDetails{
@@ -417,7 +443,7 @@ func TestProvider_ObjectEvaluation(t *testing.T) {
 					Key:        "object-flag",
 					DistinctId: "12345",
 				},
-				res: "false",
+				res: false,
 			},
 			err: true,
 			res: openfeature.InterfaceEvaluationDetails{
