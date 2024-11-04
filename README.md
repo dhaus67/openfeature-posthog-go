@@ -9,8 +9,8 @@ This repository provides an implementation of an [OpenFeature provider](https://
 This simple snippet should be enough to get you started to use the provider:
 ```go
 import (
- 	"fmt"
-  "context"
+	"fmt"
+	"context"
 
 	"github.com/dhaus67/openfeature-posthog-go"
 	"github.com/open-feature/go-sdk/openfeature"
