@@ -90,7 +90,9 @@ func (p *Provider) BooleanEvaluation(_ context.Context, flag string, defaultValu
 		}
 	}
 
-	res, found, err := p.getFeatureFlag(payload)
+	// For boolean flags, we cannot properly evaluate whether the flag was found or not since the API always returns false.
+	// This would create additional errors, so we skip the explicit check.
+	res, _, err := p.getFeatureFlag(payload)
 	if err != nil {
 		return openfeature.BoolResolutionDetail{
 			Value: defaultValue,
@@ -101,25 +103,21 @@ func (p *Provider) BooleanEvaluation(_ context.Context, flag string, defaultValu
 		}
 	}
 
-	if !found {
-		return openfeature.BoolResolutionDetail{
-			Value: defaultValue,
-			ProviderResolutionDetail: openfeature.ProviderResolutionDetail{
-				ResolutionError: openfeature.NewFlagNotFoundResolutionError(fmt.Sprintf("%q not found", flag)),
-				Reason:          openfeature.DefaultReason,
-			},
+	var parsedValue bool
+	if boolValue, ok := res.(bool); ok {
+		parsedValue = boolValue
+	} else {
+		boolValue, resolutionErr := parseFlagValue[bool](res)
+		if resolutionErr != nil {
+			return openfeature.BoolResolutionDetail{
+				Value: defaultValue,
+				ProviderResolutionDetail: openfeature.ProviderResolutionDetail{
+					ResolutionError: *resolutionErr,
+					Reason:          openfeature.ErrorReason,
+				},
+			}
 		}
-	}
-
-	parsedValue, resolutionErr := parseFlagValue[bool](res)
-	if resolutionErr != nil {
-		return openfeature.BoolResolutionDetail{
-			Value: defaultValue,
-			ProviderResolutionDetail: openfeature.ProviderResolutionDetail{
-				ResolutionError: *resolutionErr,
-				Reason:          openfeature.ErrorReason,
-			},
-		}
+		parsedValue = boolValue
 	}
 
 	return openfeature.BoolResolutionDetail{
@@ -345,8 +343,8 @@ func (p *Provider) getFeatureFlag(payload posthog.FeatureFlagPayload) (interface
 	}
 
 	// In case the flag could not be found, the client will return false for the flag value.
-	// This is the only time where it will return a boolean value instead of a string value.
-	if res, ok := res.(bool); ok {
+	// Unfortunately, there is no way of distinction for flag not found or boolean value false.
+	if res, ok := res.(bool); ok && !res {
 		return res, false, nil
 	}
 
