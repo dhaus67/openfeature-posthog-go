@@ -42,7 +42,7 @@ func TestProvider_BooleanEvaluation(t *testing.T) {
 					Key:        "bool-flag",
 					DistinctId: "12345",
 				},
-				res: "true",
+				res: true,
 			},
 			res: openfeature.BooleanEvaluationDetails{
 				Value: true,
@@ -67,16 +67,13 @@ func TestProvider_BooleanEvaluation(t *testing.T) {
 				},
 				res: false,
 			},
-			err: true,
 			res: openfeature.BooleanEvaluationDetails{
 				Value: false,
 				EvaluationDetails: openfeature.EvaluationDetails{
 					FlagKey:  "bool-flag",
 					FlagType: openfeature.Boolean,
 					ResolutionDetail: openfeature.ResolutionDetail{
-						Reason:       openfeature.ErrorReason,
-						ErrorCode:    openfeature.FlagNotFoundCode,
-						ErrorMessage: `"bool-flag" not found`,
+						Reason:       openfeature.TargetingMatchReason,
 						FlagMetadata: openfeature.FlagMetadata{},
 					},
 				},
