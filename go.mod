@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/open-feature/go-sdk v1.13.1
 	github.com/posthog/posthog-go v1.2.24
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
